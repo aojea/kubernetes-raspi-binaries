@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  # schedule:
+  #  - cron:  '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      k8sversion:
+        description: 'Kubernetes version'     
+        required: true
+        default: 'master'
+        
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: "1.15.6"
+          
+    - name: Checkout Kubernetes
+      uses: actions/checkout@v2
+      with:
+        repository: kubernetes/kubernetes
+        ref: ${{ github.event.inputs.k8sversion }}
+        path: src/k8s.io/kubernetes
+
+    - name: Install crosscompiler
+      run: |
+        sudo apt-get update || true
+        sudo apt-get install gcc-arm-linux-gnueabi g++-arm-linux-gnueabi
+        
+    - name: Build Kubernetes ARMv6
+      run: |
+        make quick-release KUBE_VERBOSE=5 \
+                           KUBE_BUILD_PLATFORMS=linux/arm \
+                           KUBE_LINUX_ARM_CC=arm-linux-gnueabi-gcc \
+                           GOARM=5
+        export KUBE_VERSION=$(git log -1 --pretty='%h')
+        echo "KUBE_VERSION=$KUBE_VERSION" >> $GITHUB_ENV
+      working-directory: src/k8s.io/kubernetes
+        
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.KUBE_VERSION }}
+        release_name: Release ${{ env.KUBE_VERSION }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: src/k8s.io/kubernetes/_output/release-tars/kubernetes-node-linux-arm.tar.gz
+        asset_name: kubernetes-node-linux-arm
+        asset_content_type: application/octet-stream
+        
