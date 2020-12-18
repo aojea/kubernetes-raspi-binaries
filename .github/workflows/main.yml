@@ -37,10 +37,14 @@ jobs:
         export KUBE_VERBOSE=5
         export KUBE_LINUX_ARM_CC=arm-linux-gnueabi-gcc
         export GOARM=5
-        make quick-release KUBE_VERBOSE=5 \
-                           KUBE_BUILD_PLATFORMS=linux/arm
+        export KUBE_BUILD_PLATFORMS=linux/arm
+        make all WHAT=cmd/kube-proxy
+        make all WHAT=cmd/kubelet
+        make all WHAT=cmd/kubeadm
+        make all WHAT=cmd/kubectl
         export KUBE_VERSION=$(git log -1 --pretty='%h')
         echo "KUBE_VERSION=$KUBE_VERSION" >> $GITHUB_ENV
+        tar cvzf kubernetes-node-linux-arm.tar.gz _output/local/bin/linux/arm/
       working-directory: src/k8s.io/kubernetes
         
     - name: Create Release
@@ -61,7 +65,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: src/k8s.io/kubernetes/_output/release-tars/kubernetes-node-linux-arm.tar.gz
+        asset_path: kubernetes-node-linux-arm.tar.gz
         asset_name: kubernetes-node-linux-arm
         asset_content_type: application/octet-stream
         
