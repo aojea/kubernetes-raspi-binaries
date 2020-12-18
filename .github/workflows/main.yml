@@ -19,9 +19,6 @@ jobs:
       with:
         go-version: "1.15.6"
 
-    - name: Checkout current repo
-      uses: actions/checkout@v2
-          
     - name: Checkout Kubernetes
       uses: actions/checkout@v2
       with:
@@ -33,7 +30,8 @@ jobs:
     - name: Patch Kubernetes
       run: |
         cd src/k8s.io/kubernetes
-        git apply  ${{ github.workspace }}/cpuset.patch
+        wget https://raw.githubusercontent.com/aojea/kubernetes-raspi-binaries/main/cpuset.patch
+        git apply cpuset.patch
 
     - name: Install crosscompiler
       run: |
