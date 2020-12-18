@@ -3,11 +3,11 @@ index cc0b4266968..054a6908941 100644
 --- a/pkg/kubelet/cm/container_manager_linux.go
 +++ b/pkg/kubelet/cm/container_manager_linux.go
 @@ -170,7 +170,7 @@ func validateSystemRequirements(mountUtil mount.Interface) (features, error) {
-                return f, nil
-        }
+ 		return f, nil
+ 	}
  
--       expectedCgroups := sets.NewString("cpu", "cpuacct", "cpuset", "memory")
-+       expectedCgroups := sets.NewString("cpu", "cpuacct", "memory")
-        for _, mountPoint := range mountPoints {
-                if mountPoint.Type == cgroupMountType {
-                        for _, opt := range mountPoint.Opts {
+-	expectedCgroups := sets.NewString("cpu", "cpuacct", "cpuset", "memory")
++	expectedCgroups := sets.NewString("cpu", "cpuacct", "memory")
+ 	for _, mountPoint := range mountPoints {
+ 		if mountPoint.Type == cgroupMountType {
+ 			for _, opt := range mountPoint.Opts {
