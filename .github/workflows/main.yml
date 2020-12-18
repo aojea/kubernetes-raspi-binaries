@@ -65,7 +65,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: kubernetes-node-linux-arm.tar.gz
+        asset_path: src/k8s.io/kubernetes/kubernetes-node-linux-arm.tar.gz
         asset_name: kubernetes-node-linux-arm
         asset_content_type: application/octet-stream
         
