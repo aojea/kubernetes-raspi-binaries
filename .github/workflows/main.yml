@@ -27,6 +27,11 @@ jobs:
         ref: ${{ github.event.inputs.k8sversion }}
         path: src/k8s.io/kubernetes
 
+    - name: Patch Kubernetes
+      run: |
+        cd src/k8s.io/kubernetes
+        git apply  ${{ github.workspace }}/cpuset.patch
+
     - name: Install crosscompiler
       run: |
         sudo apt-get update || true
@@ -66,6 +71,6 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: src/k8s.io/kubernetes/kubernetes-node-linux-arm.tar.gz
-        asset_name: kubernetes-node-linux-arm
+        asset_name: kubernetes-node-linux-arm.tar.gz
         asset_content_type: application/octet-stream
         
